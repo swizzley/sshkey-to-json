@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"encoding/json"
 )
 
 type keyPair struct {
@@ -18,21 +18,46 @@ func main() {
 	flag.Parse()
 
 	if len(*public) == 0 && len(*private) == 0 {
-		panic("must provide keys")
+		panic("must provide a certificate")
 	}
 
-	pub, err := ioutil.ReadFile(*public)
-	if err != nil {
-		panic("public key unreadable")
-	}
-	pvt, err := ioutil.ReadFile(*private)
-	if err != nil {
-		panic("private key unreadable")
-	}
+	if len(*public) > 0 && len(*private) > 0 {
+		pub, err := ioutil.ReadFile(*public)
+		if err != nil {
+			panic("public key unreadable")
+		}
+		pvt, err := ioutil.ReadFile(*private)
+		if err != nil {
+			panic("private key unreadable")
+		}
 
-	object, err := json.Marshal(keyPair{Public: string(pub), Private: string(pvt)})
-	if err != nil {
-		panic(err)
+		object, err := json.Marshal(keyPair{Public: string(pub), Private: string(pvt)})
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(object))
+	} else {
+		if len(*public) > 0 {
+			pub, err := ioutil.ReadFile(*public)
+			if err != nil {
+				panic("public key unreadable")
+			}
+			object, err := json.Marshal(keyPair{Public: string(pub)})
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(object))
+		} else {
+			pvt, err := ioutil.ReadFile(*private)
+			if err != nil {
+				panic("private key unreadable")
+			}
+
+			object, err := json.Marshal(keyPair{Private: string(pvt)})
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(object))
+		}
 	}
-	fmt.Println(string(object))
 }
